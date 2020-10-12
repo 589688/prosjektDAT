@@ -30,13 +30,13 @@ public class GPSComputer {
 	public double totalDistance() {
 
 		double distance = 0;
+		
+		for (int i=0; i < gpspoints.length-1; i++) {
+			
+			distance += GPSUtils.distance(gpspoints[i+1],gpspoints[i]);
+		}
 
-		// TODO - START
-
-		throw new UnsupportedOperationException(TODO.method());
-
-		// TODO - SLUTT
-
+		return distance;
 	}
 
 	// beregn totale hÃ¸ydemeter (i meter)
@@ -44,18 +44,24 @@ public class GPSComputer {
 
 		double elevation = 0;
 
-		// TODO - START
-
-		throw new UnsupportedOperationException(TODO.method());
-
-		// TODO - SLUTT
+		for (int i=0; i < gpspoints.length-1; i++) {
+			
+			if (gpspoints[i].getElevation() < gpspoints[i+1].getElevation()) {
+				
+				elevation += gpspoints[i+1].getElevation() - gpspoints[i].getElevation();
+			}
+		}
+		
+		return elevation;
 
 	}
 
 	// beregn total tiden for hele turen (i sekunder)
 	public int totalTime() {
 
-		throw new UnsupportedOperationException(TODO.method());
+		int tid = gpspoints[gpspoints.length - 1].getTime() - gpspoints[0].getTime();
+		
+		return tid;
 
 	}
 		
@@ -63,36 +69,35 @@ public class GPSComputer {
 
 	public double[] speeds() {
 		
-		// TODO - START		// OPPGAVE - START
+		double[] snittHast = new double[gpspoints.length-1];
 		
-		throw new UnsupportedOperationException(TODO.method());
+		for (int i=0; i < snittHast.length; i++) {
+			snittHast[i]= 3.6 * (GPSUtils.distance(gpspoints[i+1], gpspoints[i])) / (gpspoints[i+1].getTime() - gpspoints[i].getTime());
+			
+		}
 
-		// TODO - SLUTT
-
+		return snittHast;
 	}
 	
 	public double maxSpeed() {
 		
-		double maxspeed = 0;
+		double max = 0;
 		
-		// TODO - START
+		for (int i=0; i<speeds().length; i++) {
+			
+			if (speeds()[i] > max) {
+				max = speeds()[i];
+			}
+		}
 		
-		throw new UnsupportedOperationException(TODO.method());
-		
-		// TODO - SLUTT
-		
+		return max;
 	}
 
 	public double averageSpeed() {
 
-		double average = 0;
+		double average = totalDistance() / totalTime() * 3.6; 
 		
-		// TODO - START
-		
-		throw new UnsupportedOperationException(TODO.method());
-		
-		// TODO - SLUTT
-		
+		return average;
 	}
 
 	/*
@@ -116,38 +121,83 @@ public class GPSComputer {
 		double met = 0;		
 		double speedmph = speed * MS;
 
-		// TODO - START
-		
-		throw new UnsupportedOperationException(TODO.method());
+		if (speedmph < 10) {
+			met = 4.0;}
+		if (speedmph >10 && speedmph <= 12) {
+			met = 6.0;}
+		if (speedmph >12 && speedmph <= 14) {
+			met = 8.0;}
+		if (speedmph >14 && speedmph <= 16) {
+			met = 10.0;}
+		if (speedmph >16 && speedmph <= 20) {
+			met = 12.0;}
+		if (speedmph > 20) {
+			met = 16.0;}
 
-		// TODO - SLUTT
+		kcal = met * weight * secs / 3600;
 		
+		
+		return kcal;
 	}
 
 	public double totalKcal(double weight) {
 
-		double totalkcal = 0;
-
-		// TODO - START
+		double totalkcal = kcal(weight, totalTime(), averageSpeed());
 		
-		throw new UnsupportedOperationException(TODO.method());
-
-		// TODO - SLUTT
+		return totalkcal;
 		
 	}
 	
 	private static double WEIGHT = 80.0;
-	
+	private static String SEP = ":";
 	public void displayStatistics() {
 
 		System.out.println("==============================================");
+		System.out.println("Total Time" + SEP + GPSUtils.formatTime(totalTime()));
+		System.out.println("Total Distance" + SEP + GPSUtils.formatDouble(totalDistance() / 1000) + "km");
+		System.out.println("Total Elevation" + SEP + GPSUtils.formatDouble(totalElevation()) + "m");
+		System.out.println("Max speed" + SEP + GPSUtils.formatDouble(maxSpeed()) + "km/t");
+		System.out.println("Average speed" + SEP + GPSUtils.formatDouble(averageSpeed()) + "km/t");
+		System.out.println("Energy" + SEP + GPSUtils.formatDouble(totalKcal(WEIGHT)) + "kcal");
+		System.out.println("==============================================");
 
-		// TODO - START
+	}
+	
+	public double[] climbs() {
+		
+		//stigningsprosent: antall meter oppover per meter bortover
+		//en stigningsprosent på 15-30% forventes??
+		//deler elevation forskjell fra i til i+1, på distance mellom i og i+1
+		//da får vi høydemeter per lengdemeter mellom gpspunktene
+		//hva skjer hvis elevation er negativ? får negativt svar, som ikke vil ha noen innvirkning på maxclimbs
+		//hvordan få stigningsprosent? den skal beskrive høydeforskjellen i meter per 100 meters forflytning
+		// 
+		
+		double[] climb = new double[gpspoints.length-1];
+		
+		for (int i=0; i < climb.length; i++) {
+			climb[i]= (gpspoints[i +1].getElevation() - gpspoints[i].getElevation()) / (GPSUtils.distance(gpspoints[i+1], gpspoints[i]));
+			
+		}
 
-		throw new UnsupportedOperationException(TODO.method());
+		return climb;
 		
-		// TODO - SLUTT
 		
+		
+	}
+	
+	public double maxClimb() {
+		
+		double max = 0;
+		
+		for (int i=0; i<climbs().length; i++) {
+			if (climbs()[i] > max) {
+				max = climbs()[i];
+			}
+			
+		}
+		
+		return max;
 	}
 
 }

@@ -14,7 +14,7 @@ public class ShowSpeed extends EasyGraphics {
 			
 	private static final int MARGIN = 50;
 	private static final int BARHEIGHT = 200; // assume no speed above 200 km/t
-
+	
 	private GPSComputer gpscomputer;
 	private GPSPoint[] gpspoints;
 	
@@ -40,18 +40,34 @@ public class ShowSpeed extends EasyGraphics {
 		
 		showSpeedProfile(MARGIN + BARHEIGHT,N);
 	}
+
 	
 	public void showSpeedProfile(int ybase, int N) {
 
 		// get segments speeds from the GPS computer object		
 		double[] speeds = gpscomputer.speeds();
 
-		int x = MARGIN,y;
+		int x = MARGIN;
+		setColor(80,136,180);
+		setSpeed(3);
 
-		// TODO - START
-		
-		throw new UnsupportedOperationException(TODO.method());
+		for (int i = 0; i < speeds.length; i++) {
+			if (speeds[i] >= 0) {
+				
+				drawLine(x+i,ybase,x+i,ybase-(int)speeds[i]);
+		}
+			
+			else {
+				drawLine(x+i,ybase,x+i,ybase);
+	}
 	
-		// TODO - SLUTT
+		}
+		
+			pause(200);
+			
+		int L = ybase - (int)gpscomputer.averageSpeed();
+			setColor(250,50,50);
+			drawLine(x,L, speeds.length + MARGIN,L);
 	}
 }
+
